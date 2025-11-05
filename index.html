@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FinSuite — Back-office</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="icons/logo.svg" />
+  <!-- Google Identity Services (OAuth 2.0) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getStorage } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+    import firebaseConfig from './firebase-config.js';
+    window.FB = {};
+    FB.app = initializeApp(firebaseConfig);
+    FB.auth = getAuth(FB.app);
+    FB.db   = getFirestore(FB.app);
+    FB.storage = getStorage(FB.app);
+    FB.GoogleProvider = new GoogleAuthProvider();
+  </script>
+</head>
+<body>
+  <aside class="sidebar glass">
+    <div class="brand">
+      <img src="icons/logo.svg" alt="logo">
+      <h1>FinSuite</h1>
+    </div>
+
+    <nav>
+      <button class="nav-item active" data-page="accounting">
+        <span class="icon">💼</span> Accounting
+      </button>
+      <button class="nav-item" data-page="invoicing">
+        <span class="icon">🧾</span> Invoicing
+      </button>
+      <button class="nav-item" data-page="tax">
+        <span class="icon">✅</span> Tax Filing
+      </button>
+      <button class="nav-item" data-page="mail">
+        <span class="icon">✉️</span> Virtual Mailroom
+      </button>
+      <button class="nav-item" data-page="agent">
+        <span class="icon">👤</span> Registered Agent
+      </button>
+    </nav>
+
+    <div class="bottom">
+      <button id="btnSettings" class="nav-item">
+        <img src="icons/gear.svg" alt="" class="svg"> Configuración
+      </button>
+      <div class="auth glass">
+        <div id="userBox" class="user-box">
+          <img id="userPhoto" alt="">
+          <div>
+            <div id="userName">Invitado</div>
+            <div id="userEmail" class="muted"></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="btnGoogle" class="btn primary">Google Sign-In</button>
+          <button id="btnLogout" class="btn ghost">Salir</button>
+        </div>
+        <div id="pinGate" class="pin-gate">
+          <input id="pinInput" type="password" placeholder="PIN de 6 dígitos" maxlength="6" inputmode="numeric">
+          <button id="btnPin" class="btn success">Entrar</button>
+        </div>
+        <small class="muted">Google + PIN</small>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div class="title">Panel</div>
+      <div class="right">
+        <button id="btnGmailConnect" class="btn shine">Conectar Gmail</button>
+      </div>
+    </header>
+
+    <section id="page-accounting" class="page show">
+      <h2>Accounting</h2>
+      <div class="cards">
+        <div class="card glass">
+          <h3>Asientos</h3>
+          <form id="formEntry">
+            <input name="date" type="date" required>
+            <input name="account" placeholder="Cuenta" required>
+            <input name="debit" type="number" step="0.01" placeholder="Debe">
+            <input name="credit" type="number" step="0.01" placeholder="Haber">
+            <button class="btn primary">Guardar</button>
+          </form>
+          <ul id="journalList" class="list"></ul>
+        </div>
+        <div class="card glass">
+          <h3>Balance</h3>
+          <div id="balanceBox" class="stat"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-invoicing" class="page">
+      <h2>Invoicing</h2>
+      <form id="formInvoice" class="card glass">
+        <input name="customer" placeholder="Cliente" required>
+        <input name="email" type="email" placeholder="email@cliente.com" required>
+        <input name="amount" type="number" step="0.01" placeholder="Importe" required>
+        <input name="due" type="date" required>
+        <button class="btn success">Crear factura</button>
+      </form>
+      <ul id="invoiceList" class="list"></ul>
+    </section>
+
+    <section id="page-tax" class="page">
+      <h2>Tax Filing</h2>
+      <div class="card glass">
+        <p>Formulario simplificado (demo). Guarda datos en Firestore y genera un PDF (placeholder).</p>
+        <form id="formTax">
+          <input name="ein" placeholder="EIN / RFC" required>
+          <input name="year" type="number" placeholder="Año fiscal" required>
+          <input name="income" type="number" step="0.01" placeholder="Ingresos">
+          <input name="expenses" type="number" step="0.01" placeholder="Gastos">
+          <button class="btn primary">Calcular & Guardar</button>
+        </form>
+        <div id="taxResult" class="stat"></div>
+      </div>
+    </section>
+
+    <section id="page-mail" class="page">
+      <h2>Virtual Mailroom</h2>
+      <div class="card glass">
+        <button id="btnFetchMail" class="btn">Leer últimos correos</button>
+        <ul id="mailList" class="list"></ul>
+        <hr />
+        <form id="formSendMail" class="inline">
+          <input name="to" type="email" placeholder="destino@dominio.com" required>
+          <input name="subject" placeholder="Asunto" required>
+          <textarea name="body" placeholder="Mensaje"></textarea>
+          <button class="btn success">Enviar</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="page-agent" class="page">
+      <h2>Registered Agent</h2>
+      <div class="card glass">
+        <p>Sube y gestiona documentos de cumplimiento.</p>
+        <input id="fileAgent" type="file" />
+        <button id="btnUploadAgent" class="btn">Subir</button>
+        <ul id="agentFiles" class="list"></ul>
+      </div>
+    </section>
+
+    <section id="page-settings" class="page">
+      <h2>Configuración</h2>
+      <div class="card glass">
+        <label>Tema</label>
+        <select id="themeSelect">
+          <option value="auto">Auto</option>
+          <option value="dark">Oscuro</option>
+          <option value="light">Claro</option>
+        </select>
+        <label>Color espectro</label>
+        <input id="hueRange" type="range" min="0" max="360" value="265">
+        <small class="muted">Ajusta el tono principal</small>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
