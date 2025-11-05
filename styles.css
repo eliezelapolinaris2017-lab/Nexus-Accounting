@@ -19,11 +19,11 @@ body{
   display:flex;
 }
 .glass{
-  backdrop-filter: blur(14px) saturate(130%);
-  background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
-  border:1px solid var(--border);
+  backdrop-filter: blur(20px) saturate(160%);
+  background: linear-gradient(180deg, rgba(20,20,35,.75), rgba(10,10,20,.55));
+  border:1px solid rgba(255,255,255,.08);
   border-radius:16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  box-shadow: 0 15px 35px rgba(0,0,0,.6);
 }
 .sidebar{width:300px; margin:14px; padding:16px; display:flex; flex-direction:column; gap:16px}
 .brand{display:flex; gap:10px; align-items:center}
