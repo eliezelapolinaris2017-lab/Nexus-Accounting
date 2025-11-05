@@ -1,0 +1,10 @@
+{
+  "hosting": {
+    "public": "app",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "headers": [
+      { "source": "**/*.js", "headers":[{"key":"Cache-Control","value":"no-cache"}] },
+      { "source": "**", "headers":[{"key":"Content-Security-Policy","value":"default-src 'self' https://accounts.google.com https://cdn.jsdelivr.net https://www.gstatic.com https://www.googleapis.com; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' https://accounts.google.com https://cdn.jsdelivr.net https://www.gstatic.com; connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://www.googleapis.com"}] }
+    ]
+  }
+}
