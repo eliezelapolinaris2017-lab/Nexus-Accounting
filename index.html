@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nexus Accounting</title>
+  <link rel="icon" href="icons/logo.svg" />
+  <link rel="stylesheet" href="styles.css" />
+  <meta name="theme-color" content="#0b1220" />
+
+  <!-- Firebase SDK (modular ESM) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getStorage } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+    import firebaseConfig from "./firebase-config.js";
+
+    // Exponer Firebase para app.js
+    window.FB = {};
+    FB.app = initializeApp(firebaseConfig);
+    FB.auth = getAuth(FB.app);
+    FB.db = getFirestore(FB.app);
+    FB.storage = getStorage(FB.app);
+    FB.GoogleProvider = new GoogleAuthProvider();
+  </script>
+</head>
+<body>
+  <aside class="sidebar glass">
+    <div class="brand">
+      <img src="icons/logo.svg" alt="logo" />
+      <h1>Nexus Accounting</h1>
+    </div>
+
+    <nav>
+      <button class="nav-item active" data-page="dashboard">📊 Panel</button>
+      <button class="nav-item" data-page="accounts">📚 Cuentas</button>
+      <button class="nav-item" data-page="journal">🧾 Asientos</button>
+      <button class="nav-item" data-page="bank">🏦 Bancos (CSV)</button>
+      <button class="nav-item" data-page="reports">📑 Reportes</button>
+      <button class="nav-item" data-page="data">💾 Datos</button>
+    </nav>
+
+    <div class="bottom">
+      <div class="auth glass">
+        <div class="user-box">
+          <img id="userPhoto" alt="">
+          <div>
+            <div id="userName">Invitado</div>
+            <div id="userEmail" class="muted"></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="btnGoogle" class="btn primary">Iniciar sesión</button>
+          <button id="btnLogout" class="btn ghost">Salir</button>
+        </div>
+      </div>
+      <small class="muted">Firebase • Firestore • Hosting</small>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar glass">
+      <div class="title">Panel</div>
+      <div class="right">
+        <span class="muted">Nexus Accounting</span>
+      </div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <section id="page-dashboard" class="page show">
+      <div class="cards">
+        <div class="card glass">
+          <h3>Resumen</h3>
+          <div id="dashSummary" class="stat"></div>
+        </div>
+        <div class="card glass">
+          <h3>Acceso rápido</h3>
+          <div class="quick">
+            <button class="btn" data-jump="accounts">➕ Crear cuenta</button>
+            <button class="btn" data-jump="journal">🧾 Nuevo asiento</button>
+            <button class="btn" data-jump="bank">📥 Importar CSV banco</button>
+            <button class="btn" data-jump="reports">📑 Ver reportes</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CUENTAS -->
+    <section id="page-accounts" class="page">
+      <h2>Catálogo de cuentas</h2>
+      <div class="cards">
+        <div class="card glass">
+          <h3>Nueva cuenta</h3>
+          <form id="formAccount" class="inline">
+            <input name="code" placeholder="Código (ej. 1100)" required />
+            <input name="name" placeholder="Nombre (ej. Bancos)" required />
+            <select name="type" required>
+              <option value="asset">Activo</option>
+              <option value="liability">Pasivo</option>
+              <option value="equity">Patrimonio</option>
+              <option value="revenue">Ingresos</option>
+              <option value="expense">Gastos</option>
+            </select>
+            <button class="btn success">Guardar cuenta</button>
+          </form>
+        </div>
+        <div class="card glass">
+          <h3>Listado</h3>
+          <ul id="accountList" class="list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ASIENTOS -->
+    <section id="page-journal" class="page">
+      <h2>Asientos (doble partida)</h2>
+      <div class="card glass">
+        <form id="formTxn" class="txn">
+          <div class="row">
+            <input name="date" type="date" required />
+            <input name="memo" placeholder="Concepto / Memo" />
+          </div>
+          <table class="lines">
+            <thead><tr><th>Cuenta (código)</th><th>Debe</th><th>Haber</th><th></th></tr></thead>
+            <tbody id="linesBody"></tbody>
+          </table>
+          <div class="row totals">
+            <div></div>
+            <div id="sumDebit">0.00</div>
+            <div id="sumCredit">0.00</div>
+            <div></div>
+          </div>
+          <div class="row">
+            <button type="button" id="btnAddLine" class="btn">Añadir línea</button>
+            <button class="btn primary">Guardar asiento</button>
+            <button type="button" id="btnExportCSV" class="btn">Exportar Diario CSV</button>
+          </div>
+        </form>
+      </div>
+      <div class="card glass">
+        <h3>Asientos recientes</h3>
+        <ul id="txnList" class="list"></ul>
+      </div>
+    </section>
+
+    <!-- BANCOS (CSV) -->
+    <section id="page-bank" class="page">
+      <h2>Importación bancaria por CSV</h2>
+      <div class="card glass">
+        <p>Formato esperado (encabezados): <code>date,description,amount</code></p>
+        <input id="bankCsv" type="file" accept=".csv" />
+        <div class="row">
+          <button id="btnImportBank" class="btn">Importar CSV</button>
+          <button id="btnAutoMatch" class="btn success">Conciliar automáticamente</button>
+        </div>
+        <ul id="bankList" class="list"></ul>
+      </div>
+    </section>
+
+    <!-- REPORTES -->
+    <section id="page-reports" class="page">
+      <h2>Reportes</h2>
+      <div class="cards">
+        <div class="card glass">
+          <h3>Balance de comprobación</h3>
+          <div id="trialBalanceBox" class="stat"></div>
+        </div>
+        <div class="card glass">
+          <h3>Estado de Resultados (PyG)</h3>
+          <div id="isBox" class="stat"></div>
+        </div>
+        <div class="card glass">
+          <h3>Balance general</h3>
+          <div id="bsBox" class="stat"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DATOS -->
+    <section id="page-data" class="page">
+      <h2>Datos (exportar / importar)</h2>
+      <div class="card glass">
+        <div class="row">
+          <button id="btnExportJSON" class="btn">Exportar todo (JSON)</button>
+          <input id="importJsonFile" type="file" accept=".json" />
+          <button id="btnImportJSON" class="btn success">Importar JSON</button>
+        </div>
+        <small class="muted">Se exportan/importan: cuentas, asientos y líneas bancarias.</small>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
