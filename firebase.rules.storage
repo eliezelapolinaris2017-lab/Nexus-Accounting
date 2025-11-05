@@ -1,0 +1,6 @@
+// Solo dueño autenticado puede leer/escribir sus archivos
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /users/{uid}/{allPaths=**} {
+      allow
