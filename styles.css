@@ -1,0 +1,95 @@
+:root{
+  --hue:265;                     /* cambia en Configuración */
+  --bg:#0a0b14;
+  --fg:#e7e7f3;
+  --muted:#9aa0b4;
+  --glass:rgba(255,255,255,.08);
+  --border:rgba(255,255,255,.12);
+  --accent: hsl(var(--hue) 100% 68%);
+  --accent-2: hsl(calc(var(--hue)+40) 100% 70%);
+  --accent-3: hsl(calc(var(--hue)-40) 100% 65%);
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font:15px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, hsl(var(--hue) 90% 18%/.4), transparent 70%),
+    radial-gradient(1000px 500px at 110% 10%, hsl(calc(var(--hue)+50) 90% 18%/.35), transparent 60%),
+    var(--bg);
+  color:var(--fg);
+  display:flex;
+}
+
+.glass{
+  backdrop-filter: blur(14px) saturate(130%);
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow: var(--shadow);
+}
+
+.sidebar{
+  width:290px; padding:16px; margin:14px; display:flex; flex-direction:column; gap:16px;
+}
+.brand{display:flex; align-items:center; gap:10px}
+.brand img{width:28px; height:28px}
+.brand h1{font-size:20px; margin:0}
+
+nav{display:flex; flex-direction:column; gap:8px}
+.nav-item{
+  width:100%; padding:12px 14px; border:1px solid transparent;
+  border-radius:12px; background:transparent; color:var(--fg);
+  text-align:left; cursor:pointer; transition:.2s transform, .2s background;
+}
+.nav-item:hover{background:rgba(255,255,255,.06); transform:translateY(-1px)}
+.nav-item.active{background:linear-gradient(90deg, var(--accent-3), var(--accent-2)); color:#101014}
+
+.bottom{margin-top:auto; display:flex; flex-direction:column; gap:10px}
+.auth{padding:12px; display:flex; flex-direction:column; gap:10px}
+.user-box{display:flex; gap:10px; align-items:center}
+.user-box img{width:36px; height:36px; border-radius:50%; background:#222}
+.muted{color:var(--muted); font-size:12px}
+
+.btn{
+  padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,.06);
+  cursor:pointer; transition:transform .15s, box-shadow .15s;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{background: linear-gradient(180deg, var(--accent), var(--accent-2)); color:#101014; border:none}
+.btn.success{background: linear-gradient(180deg, #4ee199, #39c7a0); color:#101014; border:none}
+.btn.ghost{background:transparent}
+.btn.shine{
+  position:relative; overflow:hidden; background:linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.12));
+}
+.btn.shine::after{
+  content:""; position:absolute; inset:-40% auto -40% -60%;
+  width:60%; transform:skewX(-20deg); background:linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+  animation:shine 3s linear infinite;
+}
+@keyframes shine{to{left:120%}}
+
+main{flex:1; margin:14px 14px 14px 0; display:flex; flex-direction:column; gap:16px}
+.topbar{display:flex; align-items:center; justify-content:space-between; padding:16px; border-radius:16px}
+.topbar{background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border:1px solid var(--border)}
+
+.page{display:none}
+.page.show{display:block}
+
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px}
+.card{padding:16px}
+.list{margin:12px 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px}
+.list li{padding:10px; border:1px dashed var(--border); border-radius:10px}
+
+.stat{padding:10px 12px; border-radius:10px; background:rgba(255,255,255,.06); border:1px solid var(--border)}
+.inline{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.inline textarea{grid-column:1/-1; min-height:90px}
+
+.pin-gate{display:flex; gap:8px}
+input, select, textarea{
+  width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--border); background:rgba(10,12,20,.6);
+  color:var(--fg); outline:none;
+}
+input:focus, textarea:focus{border-color:var(--accent)}
